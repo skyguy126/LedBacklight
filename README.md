@@ -76,12 +76,14 @@ def record(self):
         self.lock.release()
 ```
 
-Additionally, a few basic start and stop controls were added to the recording class and the PCM bit of the program was finished.
+Additionally, a few basic start and stop controls were added to the recording class.
 
 ##### 3. Process the PCM data
 
 The key component here was the fast-fourier-transform (abbreviated fft), or better known as the
-discrete-fourier-transform. The concept essentially states that any audio (signal) waveform (a complex trigonometric wave) can be broken down into elementary sine and cosine functions of varying frequencies. We know that low frequency waves associate to the low frequencies in the audio playing (same concept for mid and high frequencies).
+discrete-fourier-transform. The concept essentially states that any audio (signal) waveform (a complex trigonometric wave)
+can be broken down into elementary sine and cosine functions of varying frequencies. We know that low frequency waves
+associate to the low frequencies in the audio playing (same concept for mid and high frequencies).
 
 Read [this](http://practicalcryptography.com/miscellaneous/machine-learning/intuitive-guide-discrete-fourier-transform/)
 for an excellent introduction to the math behind the algorithm.
@@ -106,16 +108,14 @@ def get_fft(self):
 Here we apply the fft to the raw PCM data which is first multiplied by a
 [window function](http://dsp.stackexchange.com/questions/37925/signal-processing-fft-gives-very-high-magnitudes-for-low-frequencies),
 to eliminate signal noise. The data is then scaled down by a factor of 1000 and the associated frequencies are calculated
-using another handy numpy function. Note only half of the buffer is returned due to the fact the other half mirrors
+using another handy numpy function. Note only half of the buffer is returned due to the fact that the other half mirrors
 the values in the first half (there is a mathematical explanation behind this but just returning half the array suits the
-purpose without over complication).
+purpose without over-complicating things).
 
 ##### 4. Afterword
 
-The final step was simply to find and connect to the Arduino board over serial. The fft data was post processed a little more:
-linearly interpolated to eliminate choppiness, downscaled using an exponential decay function and finally used to create
-threshold percentages. This data was simply send over serial to the Arduino which modified the PWM of the red, green, and blue
-based on the percentages calculated.
+The final step was simply to find and connect to the Arduino board over serial. The fft data was post-processed a little more:
+linearly interpolated to eliminate choppiness, downscaled, and finally used to create threshold percentages. This data was sent over serial to the Arduino, which modified the PWM of the red, green, and blue LEDs based on the values.
 
 ###### TLDR
 
