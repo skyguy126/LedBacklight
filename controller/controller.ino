@@ -81,7 +81,7 @@ void loop() {
         return;
 
     String data_str = Serial.readStringUntil('\n');
-    StaticJsonBuffer<256> jsonBuffer;
+    StaticJsonBuffer<128> jsonBuffer;
     JsonObject& root = jsonBuffer.parseObject(data_str);
 
     if (!root.success()) {
@@ -90,9 +90,6 @@ void loop() {
     }
 
     double low_value = root["l"];
-    double mid_value = root["m"];
-    double high_value = root["h"];
-
     speedCounter++;
 
     if (speedCounter >= fadeSpeed) {

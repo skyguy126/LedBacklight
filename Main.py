@@ -6,6 +6,28 @@ from ctypes import *
 
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
+low_b1 = 750.0
+low_b2 = 1000.0
+
+mid_b1 = 95.0
+mid_b2 = 120.0
+
+def low_slider1_func(val):
+    global low_b1
+    low_b1 = int(val)
+
+def low_slider2_func(val):
+    global low_b2
+    low_b2 = int(val)
+
+def mid_slider1_func(val):
+    global mid_b1
+    mid_b1 = int(val)
+
+def mid_slider2_func(val):
+    global mid_b2
+    mid_b2 = int(val)
+
 def find_sound_card():
     p = pyaudio.PyAudio()
     device_number = -1
@@ -16,9 +38,7 @@ def find_sound_card():
         device_name = device.get('name')
 
         if device_input_channel_count > 0 and "Stereo Mix" in device_name:
-            device_number = i
-
-    return device_number
+            return i
 
 def find_controller(id):
     dll = cdll.LoadLibrary("wmicom3.dll")
@@ -68,29 +88,65 @@ if __name__ == "__main__":
     a.setup()
     a.start()
 
-    low_b1 = 750.0
-    low_b2 = 1000.0
-
-    mid_b1 = 95.0
-    mid_b2 = 120.0
-
     # TKINTER
 
     root = Tk()
     root.wm_title("Audio Visualizer")
     root.iconbitmap(r'favicon.ico')
+    root.resizable(0, 0)
 
-    text_id = Text(root, height=1, width=35)
-    text_percent = Text(root, height=1, width=35)
-    text_raw = Text(root, height=1, width=35)
+    fr0 = Frame(root)
 
-    text_id.pack()
-    text_percent.pack()
-    text_raw.pack()
+    text_id_label = Label(fr0, text="Range")
+    text_percent_label = Label(fr0, text="Threshold")
+    text_raw_label = Label(fr0, text="Raw")
 
-    text_id_text = "low\tmid\thigh"
+    text_id = Text(fr0, height=1, width=20)
+    text_percent = Text(fr0, height=1, width=20)
+    text_raw = Text(fr0, height=1, width=20)
+
+    text_id_label.grid(row=0, column=0)
+    text_percent_label.grid(row=1, column=0)
+    text_raw_label.grid(row=2, column=0)
+
+    text_id.grid(row=0, column=1)
+    text_percent.grid(row=1, column=1)
+    text_raw.grid(row=2, column=1)
+
+    text_id_text = "low\tmid"
     text_id.delete(1.0, END)
     text_id.insert(END, text_id_text)
+
+    fr0.pack()
+
+    fr1 = Frame(root)
+
+    low_slider1_label = Label(fr1, text="low_l")
+    low_slider2_label = Label(fr1, text="low_h")
+    mid_slider1_label = Label(fr1, text="mid_l")
+    mid_slider2_label = Label(fr1, text="mid_h")
+
+    low_slider1 = Scale(fr1, resolution=10, length=300, orient=VERTICAL, from_=2500, to=25, command=low_slider1_func)
+    low_slider2 = Scale(fr1, resolution=10, length=300, orient=VERTICAL, from_=2500, to=25, command=low_slider2_func)
+    mid_slider1 = Scale(fr1, resolution=10, length=300, orient=VERTICAL, from_=500, to=25, command=mid_slider1_func)
+    mid_slider2 = Scale(fr1, resolution=10, length=300, orient=VERTICAL, from_=500, to=25, command=mid_slider2_func)
+
+    low_slider1.set(750)
+    low_slider2.set(1000)
+    mid_slider1.set(95)
+    mid_slider2.set(120)
+
+    low_slider1.grid(row=0, column=0)
+    low_slider2.grid(row=0, column=1)
+    mid_slider1.grid(row=0, column=2)
+    mid_slider2.grid(row=0, column=3)
+
+    low_slider1_label.grid(row=1, column=0)
+    low_slider2_label.grid(row=1, column=1)
+    mid_slider1_label.grid(row=1, column=2)
+    mid_slider2_label.grid(row=1, column=3)
+
+    fr1.pack()
 
     root.update_idletasks()
     root.update()
