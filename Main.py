@@ -12,6 +12,16 @@ low_b2 = 1000.0
 mid_b1 = 95.0
 mid_b2 = 120.0
 
+update_threshold = 1
+update_counter = 1
+
+def toggle_slow_mode():
+    global update_threshold
+    if slow_mode_var.get():
+        update_threshold = 5
+    else:
+        update_threshold = 1
+
 def low_slider1_func(val):
     global low_b1
     low_b1 = int(val)
@@ -148,6 +158,19 @@ if __name__ == "__main__":
 
     fr1.pack()
 
+    fr2 = Frame(root)
+
+    slow_mode_var = IntVar()
+    react_mode_var = IntVar()
+
+    slow_mode_check_button = Checkbutton(fr2, text="Enable slow mode", variable=slow_mode_var, command=toggle_slow_mode)
+    react_mode_var = Checkbutton(fr2, text="Enable audio react", variable=react_mode_var)
+
+    slow_mode_check_button.grid(row=0, column=0)
+    react_mode_var.grid(row=1, column=0)
+
+    fr2.pack()
+
     root.update_idletasks()
     root.update()
 
@@ -169,11 +192,16 @@ if __name__ == "__main__":
         text_raw_text = str(int(low_sum)) + "\t" + str(int(mid_sum))
 
         try:
-            text_percent.delete(1.0, END)
-            text_raw.delete(1.0, END)
+            if update_counter >= update_threshold:
+                text_percent.delete(1.0, END)
+                text_raw.delete(1.0, END)
 
-            text_percent.insert(END, text_percent_text)
-            text_raw.insert(END, text_raw_text)
+                text_percent.insert(END, text_percent_text)
+                text_raw.insert(END, text_raw_text)
+
+                update_counter = 1
+            else:
+                update_counter += 1
 
             root.update_idletasks()
             root.update()

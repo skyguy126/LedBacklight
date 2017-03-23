@@ -5,7 +5,7 @@
 #define greenLed 9
 #define blueLed 6
 
-const bool animateColor = true;
+const bool animateColor = false;
 const unsigned int delayVal = 1;
 const unsigned int baudRate = 9600;
 const unsigned int fadeSpeed = (animateColor) ? 5 : 9;
