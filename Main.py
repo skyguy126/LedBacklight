@@ -164,10 +164,10 @@ if __name__ == "__main__":
     react_mode_var = IntVar()
 
     slow_mode_check_button = Checkbutton(fr2, text="Enable slow mode", variable=slow_mode_var, command=toggle_slow_mode)
-    react_mode_var = Checkbutton(fr2, text="Enable audio react", variable=react_mode_var)
+    react_mode_check_button = Checkbutton(fr2, text="Disable audio react", variable=react_mode_var)
 
     slow_mode_check_button.grid(row=0, column=0)
-    react_mode_var.grid(row=1, column=0)
+    react_mode_check_button.grid(row=1, column=0)
 
     fr2.pack()
 
@@ -210,8 +210,8 @@ if __name__ == "__main__":
             exit()
 
         data = {
-            'l' : 1 - low_percent.item(),
-            'm' : mid_percent,
+            'l' : 1 - low_percent.item() if react_mode_var.get() != 1 else 1,
+            'm' : mid_percent if react_mode_var.get() != 1 else 1,
         }
 
         try:
