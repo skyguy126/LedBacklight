@@ -1,10 +1,11 @@
-import pyaudio, sys, time, signal, numpy, json, serial
+import sys, time, signal, numpy, json
 from AudioCapture import AudioCapture
+from Control import Control
 from Tkinter import *
 import pyqtgraph as pg
-from ctypes import *
 
 signal.signal(signal.SIGINT, signal.SIG_DFL)
+c = Control()
 
 low_b1 = 750.0
 low_b2 = 1000.0
@@ -38,22 +39,6 @@ def mid_slider2_func(val):
     global mid_b2
     mid_b2 = int(val)
 
-def find_sound_card():
-    p = pyaudio.PyAudio()
-    device_number = -1
-
-    for i in xrange(0, p.get_host_api_info_by_index(0).get('deviceCount')):
-        device = p.get_device_info_by_host_api_device_index(0, i)
-        device_input_channel_count = device.get('maxInputChannels')
-        device_name = device.get('name')
-
-        if device_input_channel_count > 0 and "Stereo Mix" in device_name:
-            return i
-
-def find_controller(id):
-    dll = cdll.LoadLibrary("wmicom3.dll")
-    return dll.wmicom(id)
-
 def calc_threshold(data, low, high, b1, b2):
 
     sqrsum = 0.0
@@ -76,25 +61,19 @@ def get_scaled_val(x):
 def exit(destroy=False):
     print "exiting..."
     if destroy: root.destroy()
-    if ser.is_open: ser.close()
+    c.close_serial_port()
     a.stop()
     sys.exit(-1)
 
 if __name__ == "__main__":
 
-    sound_card_port = find_sound_card()
-    assert sound_card_port > -1
-    print "Stereo Mix ID: " + str(sound_card_port)
-
     with open("secure.txt", 'r') as f:
-        controller_port = "\\\\.\\COM" + str(find_controller(f.readline().strip('\n')))
-        print "Controller port: " + str(controller_port)
+        c.find_controller_port(f.readline().strip('\n'))
 
-    ser = serial.Serial(port=controller_port, baudrate=9600)
-    if ser.is_open: ser.close()
-    ser.open()
+    c.find_sound_card_port("Stereo Mix")
+    c.open_serial_port(9600)
 
-    a = AudioCapture(sound_card_port)
+    a = AudioCapture(c.get_sound_card_port())
     a.setup()
     a.start()
 
@@ -174,11 +153,24 @@ if __name__ == "__main__":
     root.update_idletasks()
     root.update()
 
+    # Set mode to audio react
+
+    data = {
+        'cmd' : 1,
+        'mode' : 1,
+    }
+
+    try:
+        c.write_serial_port(json.dumps(data))
+    except:
+        exit(destroy=True)
+
     # LOOP
 
     low_interp = numpy.zeros((3), dtype=numpy.float32)
 
     while True:
+
         x, y = a.get_fft()
 
         low_percent, low_sum = calc_threshold(y, 0, 11, low_b1, low_b2)
@@ -210,13 +202,13 @@ if __name__ == "__main__":
             exit()
 
         data = {
-            'l' : 1 - low_percent.item() if react_mode_var.get() != 1 else 1,
-            'm' : mid_percent if react_mode_var.get() != 1 else 1,
+            'cmd' : 0,
+            'low' : 1 - low_percent.item() if react_mode_var.get() != 1 else 1,
+            'med' : mid_percent if react_mode_var.get() != 1 else 1,
         }
 
         try:
-            ser.write(json.dumps(data) + '\n')
-            ser.flush()
+            c.write_serial_port(json.dumps(data))
         except:
             exit(destroy=True)
 

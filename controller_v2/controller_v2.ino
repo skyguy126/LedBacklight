@@ -8,7 +8,7 @@
 const bool animateColor = false;
 const unsigned int delayVal = 1;
 const unsigned int baudRate = 9600;
-const unsigned int fadeSpeed = (animateColor) ? 5 : 9;
+const unsigned int fadeSpeed = (animateColor) ? 5 : 50;
 
 unsigned int colorStep = 1;
 unsigned int speedCounter = 0;
@@ -74,7 +74,8 @@ void loop() {
     double low_value = root["l"];
     double mid_value = root["m"];
 
-    colorStep = (int) (7.5 * mid_value) + 1;
+    if (animateColor)
+        colorStep = (int) (7.5 * mid_value) + 1;
 
     speedCounter++;
 
