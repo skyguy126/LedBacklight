@@ -108,9 +108,8 @@ def get_fft(self):
 Here we apply the fft to the raw PCM data which is first multiplied by a
 [window function](http://dsp.stackexchange.com/questions/37925/signal-processing-fft-gives-very-high-magnitudes-for-low-frequencies),
 to eliminate signal noise. The data is then scaled down by a factor of 1000 and the associated frequencies are calculated
-using another handy numpy function. Note only half of the buffer is returned due to the fact that the other half mirrors
-the values in the first half (there is a mathematical explanation behind this but just returning half the array suits the
-purpose without over-complicating things).
+using another handy numpy function. Note: only half of the buffer is returned due to the fact that the other half mirrors
+the values in the first half _(loosely speaking, given a real input into the Fourier transform, we have conjugate symmetry about x=0)_.
 
 ##### 4. Afterword
 
@@ -132,3 +131,4 @@ LEDS.
 ## Resources
 - [Google Material Icons ](https://material.io/icons/)
 - A HSV to RGB algorithm which I forgot where I got from, but will update as soon as I find the source.
+- [Excellent intro to Fourier transforms](https://www.ritchievink.com/blog/2017/04/23/understanding-the-fourier-transform-by-example/)
